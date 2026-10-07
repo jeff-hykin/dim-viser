@@ -97,7 +97,8 @@ export function App() {
                 className={`panel dim-panel glass${collapsed ? " collapsed" : ""}`}
                 onClick={() => collapsed && setExpanded(true)}
             >
-                <span className="title dim-title">Viser</span>
+                {/* inside Desktop, its window bar already names the app */}
+                {window.parent === window && <span className="title dim-title">Viser</span>}
                 <label className="dim-label">host</label>
                 <input
                     className="dim-input dim-mono"
