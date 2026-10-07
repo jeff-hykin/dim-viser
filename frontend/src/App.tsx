@@ -4,8 +4,8 @@
 // says it changed (useBackendState: zenoh topic state/state), so the agent's changes show here too.
 import { useEffect, useState } from "react"
 import { call } from "./api.ts"
-import type { OpenAppParams } from "./dim-app/desktop.js"
-import { EmptyState, useBackendState } from "./dim-app/react.js"
+import type { OpenAppParams } from "./dim-app/source/desktop.js"
+import { EmptyState, useBackendState } from "./dim-app/source/react.js"
 
 type State = {
     target: { host: string; port: string } | { url: string }
