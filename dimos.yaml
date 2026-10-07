@@ -1,0 +1,47 @@
+title: Viser
+dimos-desktop-api: ">=2 <3"
+dimos-api:
+    - GET /api/apps
+# the dim-app SDK's zenoh client (backend state, events): /zenoh-web and how it finds it
+zenoh-web: ">=0.4 <0.5"
+# what its server answers only its own pages (its agent: endpoints are the public API)
+private:
+    - api/state/*
+    - api/target/*
+caches:
+    - url: "https://dimos-desktop.cachix.org"
+      key: "dimos-desktop.cachix.org-1:A4P35aGJGmCan92LWyamtSFXMqaVE+VRFYnrJ8QMTeQ="
+nix:
+    cache:
+        aarch64-linux:
+            - packages.aarch64-darwin.dimosApp-aarch64-linux
+            - packages.x86_64-linux.dimosApp-aarch64-linux
+        x86_64-linux:
+            - packages.aarch64-darwin.dimosApp-x86_64-linux
+agent:
+    description: "Viser: shows the 3D manipulation planning view (viser) a dimos manipulation blueprint serves, inside Desktop"
+    endpoints:
+        - method: GET
+          path: api/state
+          description: >-
+              Viser's state: which viser server it frames (host:port or URL), the frame URL, and whether it is reachable (it
+              is only while a manipulation blueprint with the viser backend runs)
+          role: context
+        - method: POST
+          path: api/target
+          description: >-
+              Point at a viser server (the UI's host/port + Connect): host and port (default 8095) of the viser a manipulation
+              blueprint serves, or url, a full http(s) URL. Answers whether it is reachable
+          params:
+              host:
+                  type: string
+                  description: "viser host, e.g. localhost (or host:port)"
+              port:
+                  type: string
+                  description: viser port (default 8095)
+              url:
+                  type: string
+                  description: a full http(s) URL instead of host/port
+        - method: POST
+          path: api/reconnect
+          description: Check the viser server again now and reload its frame (after its blueprint restarted)
