@@ -98,7 +98,7 @@ export function App() {
                 onClick={() => collapsed && setExpanded(true)}
             >
                 {/* inside Desktop, its window bar already names the app */}
-                {window.parent === window && <span className="title dim-title">Viser</span>}
+                {globalThis.parent === window && <span className="title dim-title">Viser</span>}
                 <label className="dim-label">host</label>
                 <input
                     className="dim-input dim-mono"
