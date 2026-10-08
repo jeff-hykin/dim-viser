@@ -28,7 +28,7 @@ function resolve(state: State): string {
 }
 
 /** the Launcher, filtered to blueprints that run a viser planning view */
-const LAUNCHER: OpenAppParams = { kind: "blueprint", query: "xarm" }
+const LAUNCHER: OpenAppParams = { query: "xarm" }
 
 export function App() {
     const [state, { error: stateError }] = useBackendState<State>("api/state")
