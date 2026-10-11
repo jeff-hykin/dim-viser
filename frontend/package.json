@@ -9,7 +9,7 @@
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "dimos-react": "https://codeload.github.com/jeff-hykin/dimos-react/tar.gz/refs/tags/v0.1.3",
+        "dimos-react": "github:jeff-hykin/dimos-react#v0.2.0-beta1",
         "react": "^19.1.0",
         "react-dom": "^19.1.0"
     },

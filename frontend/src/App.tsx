@@ -157,7 +157,7 @@ export function App() {
                                 id="connect"
                                 size="sm"
                                 variant="primary"
-                                onClick={(event: MouseEvent) => (event.stopPropagation(), connect())}
+                                onClick={(event) => (event.stopPropagation(), connect())}
                             >
                                 Connect
                             </Button>
