@@ -1,11 +1,25 @@
 // Viser page: frames the viser server a dimos manipulation blueprint serves (inner iframe) once the backend says it's
 // reachable, so a down server never shows the browser's "unable to connect" page; once connected the controls collapse
 // into a pill (click to edit). Every action is a backend endpoint (api.ts); state is api/state, re-read when the backend
-// says it changed (useBackendState: zenoh topic state/state), so the agent's changes show here too.
+// says it changed (useBackendState: zenoh topic state/state), so the agent's changes show here too. The UI is
+// dimos-react's; the framed page itself is viser's own web client (served by the Python viser server).
 import { useEffect, useState } from "react"
+import {
+    Alert,
+    AppShell,
+    Button,
+    Embed,
+    EmptyState,
+    Hud,
+    StatusDot,
+    Text,
+    TextInput,
+    Toolbar,
+    useBackendState,
+    useMobile,
+} from "dimos-react"
 import { call } from "./api.ts"
-import type { OpenAppParams } from "./dim-app/source/desktop.js"
-import { EmptyState, useBackendState } from "./dim-app/source/react.js"
+import { openApp, type OpenAppParams, underDesktop } from "./dim-app/source/desktop.js"
 
 type State = {
     target: { host: string; port: string } | { url: string }
@@ -31,11 +45,15 @@ function resolve(state: State): string {
 const LAUNCHER: OpenAppParams = { query: "xarm" }
 
 export function App() {
-    const [state, { error: stateError }] = useBackendState<State>("api/state")
+    const [state, { error: stateError }] = useBackendState("state", { url: "api/state" }) as [
+        State | undefined,
+        { error: Error | null },
+    ]
     const [host, setHost] = useState("")
     const [port, setPort] = useState("")
     const [expanded, setExpanded] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const mobile = useMobile(600)
 
     useEffect(() => {
         if (state) {
@@ -53,10 +71,11 @@ export function App() {
     const connected = state?.reachable === true
     const collapsed = connected && !expanded
     const src = connected && state ? resolve(state) : undefined
+    const looking = state?.reachable === null || !state
     return (
-        <div className="frame-wrap">
+        <AppShell insetBottom>
             {src && (
-                <iframe
+                <Embed
                     key={`${src}#${state?.reload}`}
                     id="viewer"
                     title="Viser planning view"
@@ -65,77 +84,92 @@ export function App() {
                 />
             )}
 
-            <div className={`overlay${connected ? "" : " show"}`}>
-                {!connected && (
+            {!connected && (!state && stateError
+                ? (
                     <EmptyState
-                        {...(!state && stateError
-                            ? {
-                                testId: "onboard-backend-down",
-                                label: "Server not answering",
-                                tone: "warn" as const,
-                                title: "The Viser app's server isn't answering",
-                                body: "Restarting the app usually fixes it: close it with ✕ and open it again.",
-                                actions: [{ label: "Try again", onClick: () => location.reload() }],
-                            }
-                            : {
-                                testId: "onboard-no-viser",
-                                label: state?.reachable === null || !state ? "Looking for viser" : "No viser running",
-                                busy: state?.reachable === null || !state,
-                                title: "No manipulation planning view is running",
-                                body:
-                                    `Launch a manipulation blueprint whose planner uses the viser view (for example xarm-perception-sim, in simulation). This page keeps looking at ${
-                                        state?.targetOrigin ?? "…"
-                                    } and shows it as soon as it answers.`,
-                                actions: [{ label: "Open the Launcher", app: "launcher", params: LAUNCHER }],
-                            })}
+                        layer
+                        data-testid="onboard-backend-down"
+                        tone="warn"
+                        icon="warn"
+                        title="The Viser app's server isn't answering"
+                        message="Restarting the app usually fixes it: close it with ✕ and open it again."
+                        actions={<Button variant="primary" onClick={() => location.reload()}>Try again</Button>}
                     />
-                )}
-                {error && <div className="dim-alert warn">{error}</div>}
-            </div>
+                )
+                : (
+                    <EmptyState
+                        layer
+                        data-testid="onboard-no-viser"
+                        icon={looking ? "search" : "info"}
+                        title={looking ? "Looking for viser…" : "No manipulation planning view is running"}
+                        message={`Launch a manipulation blueprint whose planner uses the viser view (for example xarm-perception-sim, in simulation). This page keeps looking at ${
+                            state?.targetOrigin ?? "…"
+                        } and shows it as soon as it answers.`}
+                        actions={underDesktop()
+                            ? (
+                                <Button variant="primary" icon="external" onClick={() => openApp("launcher", LAUNCHER)}>
+                                    Open the Launcher
+                                </Button>
+                            )
+                            : null}
+                    />
+                ))}
 
-            <div
-                className={`panel dim-panel glass${collapsed ? " collapsed" : ""}`}
-                onClick={() => collapsed && setExpanded(true)}
-            >
-                {/* inside Desktop, its window bar already names the app */}
-                {globalThis.parent === window && <span className="title dim-title">Viser</span>}
-                <label className="dim-label">host</label>
-                <input
-                    className="dim-input dim-mono"
-                    id="host"
-                    type="text"
-                    spellCheck={false}
-                    autoComplete="off"
-                    value={host}
-                    onChange={(e) => setHost(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && connect()}
-                />
-                <label className="dim-label">port</label>
-                <input
-                    className="dim-input dim-mono"
-                    id="port"
-                    type="text"
-                    inputMode="numeric"
-                    spellCheck={false}
-                    autoComplete="off"
-                    value={port}
-                    onChange={(e) => setPort(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && connect()}
-                />
-                <button
-                    type="button"
-                    className="dim-btn primary"
-                    id="connect"
-                    onClick={(e) => (e.stopPropagation(), connect())}
+            <Hud position={mobile && !collapsed ? "top-left" : "top"} style={mobile && !collapsed ? { right: 0 } : {}}>
+                <Toolbar
+                    floating
+                    onClick={() => collapsed && setExpanded(true)}
+                    style={collapsed ? { cursor: "pointer" } : undefined}
+                    title={collapsed ? "click to change the viser server" : undefined}
                 >
-                    Connect
-                </button>
-                <span className="stat" title={state?.targetOrigin ?? ""}>
-                    <span className={`dot${connected ? " on" : " err"}`} />
-                    <span>{connected ? "connected" : "waiting…"}</span>
-                </span>
-                {error && <span className="dim-alert danger">{error}</span>}
-            </div>
-        </div>
+                    {/* inside Desktop, its window bar already names the app */}
+                    {self === top && <Text className="dr-title">Viser</Text>}
+                    {!collapsed && (
+                        <>
+                            <TextInput
+                                id="host"
+                                size="sm"
+                                mono
+                                placeholder="host"
+                                aria-label="host"
+                                spellCheck={false}
+                                autoComplete="off"
+                                value={host}
+                                onChange={setHost}
+                                onEnter={connect}
+                                style={{ width: mobile ? undefined : 150, flex: mobile ? 1 : undefined }}
+                            />
+                            <TextInput
+                                id="port"
+                                size="sm"
+                                mono
+                                placeholder="port"
+                                aria-label="port"
+                                inputMode="numeric"
+                                spellCheck={false}
+                                autoComplete="off"
+                                value={port}
+                                onChange={setPort}
+                                onEnter={connect}
+                                style={{ width: 72 }}
+                            />
+                            <Button
+                                id="connect"
+                                size="sm"
+                                variant="primary"
+                                onClick={(event: MouseEvent) => (event.stopPropagation(), connect())}
+                            >
+                                Connect
+                            </Button>
+                        </>
+                    )}
+                    <StatusDot tone={connected ? "ok" : looking ? "warn" : "danger"} pulse={looking} />
+                    <Text mono small muted title={state?.targetOrigin ?? ""}>
+                        {connected ? "connected" : "waiting…"}
+                    </Text>
+                </Toolbar>
+                {error && <Alert tone="danger" onClose={() => setError(null)}>{error}</Alert>}
+            </Hud>
+        </AppShell>
     )
 }
