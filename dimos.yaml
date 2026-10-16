@@ -20,23 +20,29 @@ provides:
     private:
         - api/state/*
         - api/target/*
+    when: you need to show or check the manipulation planning view (viser)
     description: "Viser: shows the 3D manipulation planning view (viser) a dimos manipulation blueprint serves, inside Desktop"
     endpoints:
         - method: GET
           path: api/state
+          when: you need to know which viser server is shown and if it is up
           description: >-
-              Viser's state: which viser server it frames (host:port or URL), the frame URL, and whether it is reachable (it
-              is only while a manipulation blueprint with the viser backend runs)
+              Viser's state. Takes nothing; answers JSON: target ({host, port} or {url}, the viser server it frames),
+              targetOrigin, frameUrl (the frame's src), loopback (whether the target is this machine), reachable (true or
+              false once checked, null before; it is only while a manipulation blueprint with the viser backend runs),
+              checkedAt (when it was last checked), reload (a counter api/reconnect bumps) and hint (how to start one)
           role: context
         - method: POST
           path: api/target
+          when: you want Viser to show a viser server at another host, port or URL
           description: >-
-              Point at a viser server (the UI's host/port + Connect): host and port (default 8095) of the viser a manipulation
-              blueprint serves, or url, a full http(s) URL. Answers whether it is reachable
+              Point at a viser server (the UI's host/port + Connect), saved across restarts: host and port (default 8095)
+              of the viser a manipulation blueprint serves, or url, a full http(s) URL (it wins over host/port). Checks
+              it right away and answers the new state (as api/state, with reachable); a bad host, port or url gets 400
           params:
               host:
                   type: string
-                  description: "viser host, e.g. localhost (or host:port)"
+                  description: "viser host, e.g. localhost (default), or host:port, or an http(s) URL"
               port:
                   type: string
                   description: viser port (default 8095)
@@ -45,4 +51,7 @@ provides:
                   description: a full http(s) URL instead of host/port
         - method: POST
           path: api/reconnect
-          description: Check the viser server again now and reload its frame (after its blueprint restarted)
+          when: the viser view is blank or stale, e.g. after its blueprint restarted
+          description: >-
+              Check the viser server again now and reload its frame in the open pages. Takes nothing; answers the state
+              (as api/state)
