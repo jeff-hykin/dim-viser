@@ -15,8 +15,8 @@ viser must listen beyond loopback (`visualization_host=0.0.0.0`) or its port be 
 
 ## Endpoints
 
-Every action is an HTTP endpoint (`backend/routes.ts`, served as `agent.json` and listed in `dimos.yaml`), so Desktop's
-agent drives the app like the UI does:
+Every action is an HTTP endpoint (`backend/routes.ts`, served as `openapi.json` and listed in `dimos.yaml`), so
+Desktop's agent drives the app like the UI does:
 
 | endpoint             | what                                                                       |
 | -------------------- | -------------------------------------------------------------------------- |

@@ -4,11 +4,16 @@
 // visualization={"backend": "viser"}; dimos/manipulation/visualization/viser, default 127.0.0.1:8095) in an iframe. This
 // server keeps the target, checks it is reachable (so the page never frames a connection error) and says when it
 // changes: `stateChanged("state")` (frontend topic state/state, through Desktop's relay; the page re-GETs api/state).
-import { HttpError, type Route, stateChanged } from "./http.ts"
+import { HttpError, type Info, type Route, stateChanged } from "./http.ts"
 import { dimosApp } from "./dimos_app.ts"
 
-export const DESCRIPTION =
-    "Viser: shows the 3D manipulation planning view (viser) a dimos manipulation blueprint serves, inside Desktop"
+export const INFO: Info = {
+    title: "Viser",
+    version: "1.0.0",
+    description:
+        "Viser: shows the 3D manipulation planning view (viser) a dimos manipulation blueprint serves, inside " +
+        "Desktop",
+}
 
 export const DEFAULT_PORT = "8095"
 const PROBE_TIMEOUT_MS = 2500
