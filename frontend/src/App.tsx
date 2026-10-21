@@ -19,6 +19,7 @@ import {
     useMobile,
 } from "dimos-react"
 import { call } from "./api.ts"
+// @deno-types="./dim-app/source/desktop.d.ts"
 import { openApp, type OpenAppParams, underDesktop } from "./dim-app/source/desktop.js"
 
 type State = {

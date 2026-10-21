@@ -30,9 +30,10 @@ There is no `view` endpoint: viser is a cross-origin iframe, so neither the page
 
 ```sh
 deno task test && deno task check     # backend tests, dimos.yaml ↔ routes check
-cd frontend && npm install && npm run typecheck && npm run build
-deno task dev                         # backend on :8787; `npm run dev` in frontend proxies api/ to it
+cd frontend && deno install && deno task build
+deno task dev                         # backend on :8787; `deno task dev` in frontend proxies api/ to it
 nix build .#dimosApp                  # what Desktop builds: bin/dimos-app-server
+deno task update-hashes               # after changing frontend/deno.json or deno.lock: flake.nix's hashes for the page
 ```
 
 Licensed under Apache-2.0.
