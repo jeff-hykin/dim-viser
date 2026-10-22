@@ -1,9 +1,13 @@
 title: Viser
-spec-version: v1.3 # the dimos.yaml spec version this file follows
+spec-version: v1.4 # the dimos.yaml spec version this file follows
 version: "0.1.13" # this app's own version (its latest release tag)
 uses:
     "@desktop-gateway":
-        - GET /api/apps
+        - GET /info/apps
+        # the dim-app SDK's zenoh client (backend state) finds the zenoh bridge and this app's namespace here
+        - GET /management/gateways/zenoh
+        # the backend's publishFrontend (state changed, events) relays to the page through Desktop
+        - POST /ui/apps/{pkg}/frontend/{topic}
     # the dim-app SDK's zenoh client (backend state, events): the zenoh bridge and how it finds it
     "@zenoh-gateway": ">=0.5 <0.6"
 caches:
