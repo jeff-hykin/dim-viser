@@ -1,6 +1,6 @@
 title: Viser
 spec-version: v1.3 # the dimos.yaml spec version this file follows
-version: "0.1.12" # this app's own version (its latest release tag)
+version: "0.1.13" # this app's own version (its latest release tag)
 uses:
     "@desktop-gateway":
         - GET /api/apps
